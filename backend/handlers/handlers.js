@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 //signup handler in backend
-export const SignIn = async (req, res) => {
+const SignIn = async (req, res) => {
     try {
         const { email, name, password } = req.body;
         if (!email || !name || !password) {
@@ -25,7 +25,7 @@ export const SignIn = async (req, res) => {
 };
 
 // Login Handler backend
-export const Login = async (req, res) => {
+const Login = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
@@ -44,3 +44,8 @@ export const Login = async (req, res) => {
         res.status(500).json({ message: "Something went wrong. Please try again later." });
     }
 };
+
+export {
+    SignIn,
+    Login,
+}
