@@ -6,9 +6,10 @@ const CheckPage = () => {
 
     useEffect(() => {
         const checkBackend = async () => {
+            const authToken = Cookie.get("accessToken");
             try {
-                const response = await axiosInstance.get("/api/health");
-                setStatus(response.data.message || "Connected to backend successfully!");
+                const response = await axiosInstance.post("/api/auth/checkUser", authToken);
+                setStatus(response.data.message || "Connected to user successfully!");
             } catch (error) {
                 console.error("Error connecting to backend:", error);
                 setStatus("Failed to connect to backend.");

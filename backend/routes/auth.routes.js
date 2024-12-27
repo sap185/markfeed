@@ -1,11 +1,11 @@
 import express from "express";
-import { SignIn, Login, getUserDetails } from "./handlers.js";
-import verifyToken from "./middleware/verifyToken.js";
+import { SignUp, Login, checkUser } from "../handlers/handlers.js";
 
 const router = express.Router();
 
-router.post("/signup", SignIn);
+router.post("/signup", SignUp);
 router.post("/login", Login);
-router.get("/user", verifyToken, getUserDetails);
+// router.get("/refresh-token", RefreshToken);
+router.post("/checkUser", checkUser)
 
 export default router;

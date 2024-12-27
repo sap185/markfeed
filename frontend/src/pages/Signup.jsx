@@ -1,7 +1,7 @@
 import Navbar from "../components/Navbar";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { handleSignInDetailsSubmit } from "../handlers/handlers";
+import { handleSignUpDetailsSubmit } from "../handlers/handlers";
 import { toast, Toaster } from 'react-hot-toast';
 import { useNavigate } from "react-router-dom";
 
@@ -13,10 +13,10 @@ const Signup = () => {
     const [cnfmPassword, setCnfmPassword] = useState("");
     const navigate = useNavigate();
 
-    const handleSignInSubmit = async (e) => {
+    const handleSignUpSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await handleSignInDetailsSubmit(email, name, password, cnfmPassword);
+            const response = await handleSignUpDetailsSubmit(email, name, password, cnfmPassword);
             toast.success(response.message || "Signed Up Successfully!");
             setTimeout(() => {
                 navigate("/login");
@@ -36,7 +36,7 @@ const Signup = () => {
                 <Toaster />
 
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form className="space-y-6" onSubmit={handleSignInSubmit}>
+                    <form className="space-y-6" onSubmit={handleSignUpSubmit}>
                         <div>
                             <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
                                 Email address
