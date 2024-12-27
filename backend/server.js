@@ -3,7 +3,11 @@ import dotenv from "dotenv";
 import connectDB from "./db/connectDB.js";
 import corsMiddleware from "./middlewares/corsMiddleware.js";
 
-import { SignIn, Login } from "./handlers/handlers.js";
+// For Auth
+import authRoutes from "./routes/auth.routes.js";
+
+// For other routes
+import SpaceRouter from "./routes/Space.routes.js";
 
 dotenv.config();
 
@@ -11,14 +15,13 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 connectDB();
 
-// Middleware
+// Middlewares 
 app.use(corsMiddleware);
 app.use(express.json());
 
-// Routes
-app.post("/api/SignIn", SignIn);
-app.post("/api/login", Login);
-
+// Routes : - authentication routes
+app.use("/api/auth", authRoutes);
+app.use("/api", SpaceRouter);
 
 
 
