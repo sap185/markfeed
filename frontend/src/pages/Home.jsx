@@ -9,6 +9,7 @@ import { RiFileAddLine } from "react-icons/ri";
 import { CiCirclePlus } from "react-icons/ci";
 import { checkAuthentication } from "../handlers/auth.handlers";
 import SampleImage from "/istockphoto-1183790559-612x612.jpg";
+// import axiosInstance from "../api/axios";
 
 // Reusable OverviewCard Component
 // eslint-disable-next-line react/prop-types
@@ -73,10 +74,16 @@ const Home = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       console.log("Form submitted successfully:", formData);
+      // try {
+      //   const response = await axiosInstance.post("/api/save-space", formData);
+      //   console.log(response.data.message);
+      // } catch (error) {
+      //   console.log(error)
+      // }
       toggleModal();
     }
   };

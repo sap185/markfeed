@@ -7,7 +7,7 @@ import corsMiddleware from "./middlewares/corsMiddleware.js";
 import authRoutes from "./routes/auth.routes.js";
 
 // For other routes
-// import SpaceRouter from "./routes/Space.routes.js";
+import SpaceRouter from "./routes/Space.routes.js";
 
 dotenv.config();
 
@@ -21,7 +21,7 @@ app.use(express.json());
 
 // Routes : - authentication routes
 app.use("/api/auth", authRoutes);
-// app.use("/api", SpaceRouter);
+app.use("/api/save-space", SpaceRouter);
 
 
 
