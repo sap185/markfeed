@@ -5,8 +5,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const ACCESS_TOKEN_EXPIRES_IN = "1h";
-const REFRESH_TOKEN_EXPIRES_IN = "7d";
+const ACCESS_TOKEN_EXPIRES_IN = "10d";
+const REFRESH_TOKEN_EXPIRES_IN = "30d";
 
 // Signup Handler
 const SignUp = async (req, res) => {
@@ -47,7 +47,6 @@ const Login = async (req, res) => {
             return res.status(401).json({ message: "Invalid email or password." });
         }
 
-        // Generate Tokens
         const accessToken = jwt.sign(
             { userId: user._id },
             process.env.JWT_SECRET,
@@ -55,16 +54,12 @@ const Login = async (req, res) => {
         );
         const refreshToken = jwt.sign(
             { userId: user._id },
-            process.env.JWT_REFRESH_SECRET,
+            process.env.REFRESH_TOKEN_SECRET,
             { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
         );
 
-
-        // Save refresh token
         user.refreshToken = refreshToken;
         await user.save();
-
-        // Send Tokens (HTTP-only cookies recommended for production)
         res.status(200).json({ accessToken, refreshToken });
     } catch (error) {
         console.error("Error in Login:", error);
@@ -72,34 +67,42 @@ const Login = async (req, res) => {
     }
 };
 
-// Access Token Verification Handler
 const checkUser = async (req, res) => {
     try {
         const { accessToken } = req.body;
 
         if (!accessToken) {
+            console.error("Access Token is missing in the request.");
             return res.status(400).json({ message: "Access token is required." });
         }
 
         jwt.verify(accessToken, process.env.JWT_SECRET, async (err, decoded) => {
             if (err) {
                 if (err.name === "TokenExpiredError") {
+                    console.error("Access token expired.");
                     return res.status(401).json({ message: "Access token expired." });
                 }
+                console.error("Invalid access token.");
                 return res.status(401).json({ message: "Invalid access token." });
             }
 
             const user = await User.findById(decoded.userId);
             if (!user) {
-                return res.status(404).json({ message: "User not found." });
+                console.error("User  not found.");
+                return res.status(404).json({ message: "User  not found." });
             }
+            res.status(200).json({ message: "User  authenticated successfully.", id: user._id.toString() });
 
-            res.status(200).json({ message: "User authenticated successfully.", id: user._id });
         });
     } catch (error) {
-        console.error("Error in checkUser:", error);
+        console.error("Error in checkUser :", error);
         res.status(500).json({ message: "Internal server error." });
     }
 };
 
-export { SignUp, Login, checkUser };
+
+export {
+    SignUp,
+    Login,
+    checkUser
+};

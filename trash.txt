@@ -87,3 +87,91 @@ const SidebarItem = styled('div')(({ theme, active }) => ({
         backgroundColor: theme.palette.action.hover,
     },
 }));
+
+
+
+
+
+
+
+
+// import { useState, useEffect } from "react";
+// import axiosInstance from "../api/axios.js";
+import Cookie from "cookie";
+
+const CheckPage = () => {
+    // const [status, setStatus] = useState("Checking...");
+
+    // useEffect(() => {
+    //     const checkBackend = async () => {
+    //         const authToken = Cookie.get("accessToken");
+    //         console.log(authToken);
+    //         // setStatus(authToken);
+    //         // try {
+    //         //     const response = await axiosInstance.post("/api/auth/checkUser", authToken);
+    //         //     setStatus(response.data.message || "Connected to user successfully!");
+    //         // } catch (error) {
+    //         //     console.error("Error connecting to backend:", error);
+    //         //     setStatus("Failed to connect to backend.");
+    //         // }
+    //     };
+
+    //     checkBackend();
+    // }, []);
+    const authToken = Cookie.get("accessToken");
+    console.log(authToken);
+
+    return (
+        <div>
+            <h1>CheckPage</h1>
+            <p>Status: {status}</p>
+        </div>
+    );
+};
+
+export default CheckPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import axiosInstance from "../api/axios";
+
+const CheckPage = () => {
+    const [status, setStatus] = useState();
+    useEffect(() => {
+        const getAuthToken = async () => {
+            // Use js-cookie to fetch the authToken
+            const accessToken = Cookies.get("accessToken");
+            console.log("Access Token:", accessToken);
+            const response = await axiosInstance.post("/api/auth/checkUser", {
+                accessToken
+            });
+            setStatus(response.message);
+            console.log(response.data.message);
+
+        };
+
+        getAuthToken();
+    }, []);
+
+    return (
+        <div>
+            <h1>CheckPage</h1>
+            <p>Check the console for the access token.</p>
+            <p>Status: {status}</p>
+        </div>
+    );
+};
+
+export default CheckPage;

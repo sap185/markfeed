@@ -22,14 +22,12 @@ const Login = () => {
         try {
             setLoading(true);
 
-            // Make login request
             const response = await loginHandlerRequest(email, password);
-
-            // Check for accessToken in response
             if (response?.accessToken) {
                 console.log("Login successful. Redirecting...");
+                
                 toast.success("Logged In Successfully!");
-                // Navigate to the home page
+
                 navigate("/home");
             } else {
                 console.error("Unexpected response:", response);
