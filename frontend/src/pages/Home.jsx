@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import HomeNav from "../components/HomeNav";
 import Footer from "../components/Footer";
 import { IoVideocamOutline } from "react-icons/io5";
@@ -12,6 +11,7 @@ import { checkAuthentication } from "../handlers/auth.handlers";
 import SampleImage from "/istockphoto-1183790559-612x612.jpg";
 
 // Reusable OverviewCard Component
+// eslint-disable-next-line react/prop-types
 const OverviewCard = ({ icon, title, description }) => (
   <div className="bg-gradient-to-br from-blue-50 to-white shadow-md rounded-xl p-8 w-72 text-center">
     {icon}
@@ -27,6 +27,21 @@ const Home = () => {
   const [formData, setFormData] = useState({ name: "", description: "" });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const authenticate = async () => {
+      try {
+        const { isAuthenticated } = await checkAuthentication();
+        setIsAuthenticated(isAuthenticated);
+        if (!isAuthenticated) navigate("/login");
+      } catch (error) {
+        console.error("Authentication failed:", error);
+        setIsAuthenticated(false);
+      }
+    };
+    authenticate();
+  }, [navigate]);
+
   const toggleModal = () => setShowModal(!showModal);
 
   const handleImageChange = (event) => {
@@ -59,23 +74,15 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {
-    const authenticate = async () => {
-      try {
-        const { isAuthenticated } = await checkAuthentication();
-        setIsAuthenticated(isAuthenticated);
-        if (!isAuthenticated) {
-          setTimeout(() => {
-            navigate('/login');
-          }, 1500);
-        }
-      } catch (error) {
-        console.error("Authentication failed:", error);
-        setIsAuthenticated(false);
-      }
-    };
-    authenticate();
-  }, []);
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="bg-white p-8 rounded-md shadow-md">
+          Please login before reaching here
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col bg-gray-50 min-h-screen">
@@ -120,7 +127,6 @@ const Home = () => {
               <button
                 className="flex items-center text-blue-600 border border-blue-600 rounded-md px-4 py-2 hover:bg-blue-100 mt-5"
                 onClick={toggleModal}
-                aria-label="Create New Space"
               >
                 <CiCirclePlus className="mr-2" />
                 Create New Space
@@ -132,84 +138,105 @@ const Home = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-md shadow-lg w-[1000px] h-[600px] p-8 relative">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Create New Space</h2>
-            <h3 className="text-lg text-gray-500 mb-4">
-              After creating the space, you can add all essentials on this page.
-            </h3>
-
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div>
-                <label className="block text-gray-700 mb-2">
-                  Space Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className={`w-full border rounded-md p-2 ${errors.name ? "border-red-500" : "border-gray-300"}`}
-                  placeholder="Enter space name"
-                />
-                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-              </div>
-
-              <div>
-                <label className="block text-gray-700 mb-2">Space Image</label>
-                <div className="relative inline-block">
-                  <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-300">
-                    <img src={spaceImage} alt="Profile" className="w-full h-full object-cover" />
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    id="spaceImageInput"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                  <label
-                    htmlFor="spaceImageInput"
-                    className="absolute top-1/2 transform -translate-y-1/2 -right-4 bg-blue-500 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white cursor-pointer"
-                    aria-label="Upload Space Image"
-                  >
-                    <span className="text-white text-sm font-bold">+</span>
+          <div className="bg-white rounded-md shadow-lg w-[1000px] h-[600px] p-8 relative flex">
+            <div className="w-1/2 pr-4">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Create New Space</h2>
+              <h3 className="text-lg text-gray-500 mb-4">
+                After creating the space, you can add all essentials on this page.
+              </h3>
+              {/* user inputs */}
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                <div>
+                  <label className="block text-gray-700 mb-2">
+                    Space Name <span className="text-red-500">*</span>
                   </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className={`w-full border rounded-md p-2 ${errors.name ? "border-red-500" : "border-gray-300"
+                      }`}
+                    placeholder="Enter space name"
+                  />
+                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 mb-2">Space Image</label>
+                  <div className="relative inline-block">
+                    <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-300">
+                      <img src={spaceImage} alt="Space" className="w-full h-full object-cover" />
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="spaceImageInput"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="spaceImageInput"
+                      className="absolute top-1/2 transform -translate-y-1/2 -right-4 bg-blue-500 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white cursor-pointer"
+                    >
+                      <span className="text-white text-sm font-bold">+</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 mb-2">
+                    Description <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    className={`w-full border rounded-md p-2 ${errors.description ? "border-red-500" : "border-gray-300"
+                      }`}
+                    placeholder="Enter description"
+                  ></textarea>
+                  {errors.description && (
+                    <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white rounded-md px-4 py-2 hover:bg-blue-700"
+                >
+                  Save
+                </button>
+              </form>
+            </div>
+
+            <div className="w-1/2 pl-4 border-l border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Preview</h2>
+              <div className="border rounded-md p-4">
+                <div className="flex flex-col items-center">
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-300 mb-4">
+                    <img src={spaceImage} alt="Preview Space" className="w-full h-full object-cover" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-700">
+                    {formData.name || "Space Name"}
+                  </h3>
+                  <p className="text-gray-500 mt-2">
+                    {formData.description || "Description will appear here."}
+                  </p>
                 </div>
               </div>
-
-              <div>
-                <label className="block text-gray-700 mb-2">
-                  Description <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className={`w-full border rounded-md p-2 ${errors.description ? "border-red-500" : "border-gray-300"}`}
-                  placeholder="Enter description"
-                ></textarea>
-                {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
-              </div>
-
-              <button
-                type="submit"
-                className="bg-blue-600 text-white rounded-md px-4 py-2 hover:bg-blue-700"
-                aria-label="Save New Space"
-              >
-                Save
-              </button>
-            </form>
+            </div>
 
             <button
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
               onClick={toggleModal}
-              aria-label="Close Modal"
             >
               ✖
             </button>
           </div>
         </div>
       )}
+
 
       <Footer />
     </div>
