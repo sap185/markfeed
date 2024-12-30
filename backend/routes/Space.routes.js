@@ -12,13 +12,14 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage() }); 
+// const upload = multer({ dest: "uploads/" }); // Store files in the "uploads" directory 
 
 const router = express.Router();
 
 router.post("/save-space", upload.single('spaceImage'), async (req, res) => {
     try {
-        // console.log(req.body);
+        console.log(req.body);
         cloudinary.v2.uploader.upload_stream(
             { resource_type: 'image' },
             async (error, cloudResult) => {
@@ -27,13 +28,13 @@ router.post("/save-space", upload.single('spaceImage'), async (req, res) => {
                 }
 
                 const newSpace = {
-                    userId: req.body.userId || req.query.userId,
-                    headerName: req.body.headerName || req.query.headerName,
-                    customizedMessage: req.body.customizedMessage || req.query.customizedMessage,
-                    description: req.body.description || req.query.description,
-                    question1: req.body.question1 || req.query.question1,
-                    question2: req.body.question2 || req.query.question2,
-                    spaceImage: cloudResult.secure_url, // URL from Cloudinary
+                    userId: req.body.userId,
+                    headerName: req.body.headerName,
+                    customizedMessage: req.body.customizedMessage,
+                    description: req.body.description,
+                    question1: req.body.question1,
+                    question2: req.body.question2,
+                    spaceImage: cloudResult.secure_url,
                     createdAt: new Date(),
                 };
 
@@ -42,7 +43,7 @@ router.post("/save-space", upload.single('spaceImage'), async (req, res) => {
                     const savedSpace = await Space.create(newSpace);
                     res
                         .status(200)
-                        .json(savedSpace);
+                        .json({ message: 'Space saved successfully', space: savedSpace });
                 } catch (dbError) {
                     res
                         .status(500)
@@ -57,5 +58,6 @@ router.post("/save-space", upload.single('spaceImage'), async (req, res) => {
             .json({ error: 'Server error' });
     }
 });
+
 
 export default router;

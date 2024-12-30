@@ -21,7 +21,7 @@ app.use(express.json());
 
 // Routes : - authentication routes
 app.use("/api/auth", authRoutes);
-app.use("/api/save-space", SpaceRouter);
+app.use("/api", SpaceRouter);
 
 
 

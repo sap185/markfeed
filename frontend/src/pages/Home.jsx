@@ -9,7 +9,8 @@ import { RiFileAddLine } from "react-icons/ri";
 import { CiCirclePlus } from "react-icons/ci";
 import { checkAuthentication } from "../handlers/auth.handlers";
 import SampleImage from "/istockphoto-1183790559-612x612.jpg";
-// import axiosInstance from "../api/axios";
+import axiosInstance from "../api/axios";
+import Cookies from "js-cookie";
 
 // Reusable OverviewCard Component
 // eslint-disable-next-line react/prop-types
@@ -26,12 +27,13 @@ const Home = () => {
   const [spaceImage, setSpaceImage] = useState(SampleImage);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [formData, setFormData] = useState({
+    userId: Cookies.get("userId"),
     headerName: "",
     description: "",
     customizedMessage: "",
     question1: "",
     question2: "",
-    spaceImage: "",
+    spaceImage: null,
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
@@ -52,9 +54,10 @@ const Home = () => {
 
   const toggleModal = () => setShowModal(!showModal);
 
-  const handleImageChange = (event) => {
-    const file = event.target.files[0];
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
     if (file) {
+      setFormData((prev) => ({ ...prev, spaceImage: file }));
       const reader = new FileReader();
       reader.onload = () => setSpaceImage(reader.result);
       reader.readAsDataURL(file);
@@ -78,12 +81,14 @@ const Home = () => {
     e.preventDefault();
     if (validateForm()) {
       console.log("Form submitted successfully:", formData);
-      // try {
-      //   const response = await axiosInstance.post("/api/save-space", formData);
-      //   console.log(response.data.message);
-      // } catch (error) {
-      //   console.log(error)
-      // }
+      try {
+        const response = await axiosInstance.post("/api/save-space", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        console.log(response.data);
+      } catch (error) {
+        console.log(error)
+      }
       toggleModal();
     }
   };
