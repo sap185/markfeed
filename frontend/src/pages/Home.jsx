@@ -11,6 +11,8 @@ import { checkAuthentication } from "../handlers/auth.handlers";
 import SampleImage from "/istockphoto-1183790559-612x612.jpg";
 import axiosInstance from "../api/axios";
 import Cookies from "js-cookie";
+import { io } from "socket.io-client";
+import toast, { Toaster } from "react-hot-toast";
 
 // Reusable OverviewCard Component
 // eslint-disable-next-line react/prop-types
@@ -36,6 +38,7 @@ const Home = () => {
     spaceImage: null,
   });
   const [errors, setErrors] = useState({});
+  const [spaceCount, setSpaceCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -86,12 +89,35 @@ const Home = () => {
           headers: { "Content-Type": "multipart/form-data" },
         });
         console.log(response.data);
+        if(response.data.status === "200") {
+          toast.success("Space saved successfully!");
+        }
       } catch (error) {
         console.log(error)
       }
       toggleModal();
     }
   };
+
+
+  useEffect(() => {
+    const socket = io("http://localhost:5001");
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+    });
+    socket.on("updateSpaceCount", (data) => {
+      console.log("Received updated space count:", data); // Log received data
+      if (data.userId === Cookies.get("userId")) {
+        console.log("Setting space count:", data.spaceCount); // Check the value before setting it
+        setSpaceCount(data.spaceCount || 0);
+      }
+    });
+
+    return () => {
+      socket.off("updateSpaceCount");
+      socket.disconnect();
+    };
+  }, []);
 
   if (!isAuthenticated) {
     return (
@@ -106,14 +132,13 @@ const Home = () => {
   return (
     <div className="flex flex-col bg-gray-50 min-h-screen">
       <HomeNav />
+      <Toaster />
       <div className="flex items-center justify-center py-10">
         <div className="w-full max-w-[1000px] p-10">
           <h1 className="text-4xl font-semibold text-gray-800 leading-tight mb-10">Overview</h1>
           <div className="flex items-center justify-center gap-8">
-            <OverviewCard icon={<IoVideocamOutline className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Videos" description="0 / 2"
-            />
-            <OverviewCard icon={<AiFillDingtalkCircle className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Spaces" description="0"
-            />
+            <OverviewCard icon={<IoVideocamOutline className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Videos" description="0 / 2" />
+            <OverviewCard icon={<AiFillDingtalkCircle className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Spaces" description={`${spaceCount}`} />
             <OverviewCard icon={<GrPlan className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Current Plan" description={
               <div className="flex items-center justify-center mt-3 space-x-2">
                 <p className="text-lg text-gray-500">Starter</p>

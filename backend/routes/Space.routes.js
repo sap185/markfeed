@@ -3,6 +3,7 @@ import cloudinary from 'cloudinary';
 import multer from 'multer';
 import Space from '../models/Spaces.models.js';
 import dotenv from "dotenv";
+import { getIo } from '../socket.js';
 
 dotenv.config();
 
@@ -12,8 +13,7 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const upload = multer({ storage: multer.memoryStorage() }); 
-// const upload = multer({ dest: "uploads/" }); // Store files in the "uploads" directory 
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
@@ -44,6 +44,13 @@ router.post("/save-space", upload.single('spaceImage'), async (req, res) => {
                     res
                         .status(200)
                         .json({ message: 'Space saved successfully', space: savedSpace });
+
+                        const io = getIo();
+                        const spaceCount = await Space.countDocuments({ userId: req.body.userId });
+                        console.log("spaceCount:", spaceCount);
+                        io.emit("updateSpaceCount", { userId: req.body.userId, spaceCount });
+                        console.log(io.emit("updateSpaceCount", { userId: req.body.userId, spaceCount }));
+
                 } catch (dbError) {
                     res
                         .status(500)
