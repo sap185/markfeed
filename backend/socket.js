@@ -1,32 +1,36 @@
-import dotenv from "dotenv";
-dotenv.config();
 import { Server } from "socket.io";
+import dotenv from "dotenv";
+// import Space from "../backend/models/Spaces.models";
 
-let io;  // Declare a variable to hold the io instance
+dotenv.config();
+
+let io;
 
 const initSocket = (server) => {
     io = new Server(server, {
         cors: {
-            origin: process.env.Frontend_URL,  // Allow any domain, adjust as per your requirements
-            methods: ["GET", "POST"]
-        }
+            origin: process.env.Frontend_URL || "*",
+            methods: ["GET", "POST"],
+        },
     });
 
     io.on("connection", (socket) => {
-        console.log(`User connected: ${socket.id}`);
+        console.log(`New connection: ${socket.id}`);
 
-        // Listen for specific events like 'updateSpaceCount'
-        socket.on("updateSpaceCount", (data) => {
-            console.log("Received updateSpaceCount:", data);
-            io.emit("updateSpaceCount", data);  // Emit to all connected clients
-        });
-
+        // socket.on("updateSpaceCount", async() => {
+        //     const count =await Space.countDocuments({ userId: socket.id });
+        //     // io.emit("updateSpaceCount", { userId: socket.id, spaceCount: count });
+        //     console.log(io.emit("updateSpaceCount", { userId: socket.id, spaceCount: count }));
+            
+        // });
         socket.on("disconnect", () => {
-            console.log("User disconnected:", socket.id);
+            console.log(`Socket disconnected: ${socket.id}`);
         });
     });
+
+    return io;
 };
 
-const getIo = () => io;  // Function to access the initialized io instance
+const getIo = () => io;
 
-export { initSocket, getIo };  // Export both functions
+export { initSocket, getIo };

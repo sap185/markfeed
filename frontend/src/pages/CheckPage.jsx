@@ -1,30 +1,46 @@
-import { useState, useEffect } from "react";
-import { checkAuthentication } from "../handlers/auth.handlers";
+import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+import Cookies from "js-cookie";
 
 const CheckPage = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [errorMessage, setErrorMessage] = useState(null);
-    const [userId, setUserId] = useState(null);
+    const [spaceCount, setSpaceCount] = useState(0);
+    const [data, setData] = useState("");
 
     useEffect(() => {
-        const authenticate = async () => {
-            const { isAuthenticated, userId, errorMessage } = await checkAuthentication();
-            setIsAuthenticated(isAuthenticated);
-            setUserId(userId);
-            setErrorMessage(errorMessage);
+        const socket = io("http://localhost:5001");
+
+        socket.on("connect", () => {
+            console.log("Socket connected:", socket.id);
+        });
+        try {
+            socket.on("updateSpaceCount", (data) => {
+                console.log("Received updated space count:", data);
+                const userId = Cookies.get("userId");
+                setData(data);
+                if (data.userId === userId) {
+                    console.log("Setting space count:", data.spaceCount);
+                    setSpaceCount(data.spaceCount || 0);
+                }
+            });
+        } catch (error) {
+            console.error("Error handling updateSpaceCount:", error);
+        }
+
+
+        // Cleanup on component unmount
+        return () => {
+            socket.removeAllListeners();
+            socket.disconnect();
+            console.log("Socket disconnected.");
         };
-        authenticate();
     }, []);
 
     return (
         <div>
-            <h1>CheckPage</h1>
-            <p>Check the console for the authentication status.</p>
-            <p>isAuthenticated: {isAuthenticated ? "Yes" : "No"}</p>
-            {errorMessage && <p style={{ color: "red" }}>Error: {errorMessage}</p>}
-            {userId && <p>UserId: {userId}</p>}
-        </div>
-    );
+            Space Count: {spaceCount} <br />
+            userId : {Cookies.get("userId")} <br />
+            data : {data}
+        </div>);
 };
 
 export default CheckPage;

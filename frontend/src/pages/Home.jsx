@@ -89,7 +89,7 @@ const Home = () => {
           headers: { "Content-Type": "multipart/form-data" },
         });
         console.log(response.data);
-        if(response.data.status === "200") {
+        if (response.data.status === "200") {
           toast.success("Space saved successfully!");
         }
       } catch (error) {
@@ -101,14 +101,27 @@ const Home = () => {
 
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+    const fetchSpaceCount = async () => {
+      try {
+        const response = await axiosInstance.get(`/api/get-space-count?userId=${Cookies.get("userId")}`);
+        setSpaceCount(response.data.spaceCount || 0);
+      } catch (error) {
+        console.error("Error fetching space count:", error);
+      }
+    };
+    fetchSpaceCount();
+
     const socket = io("http://localhost:5001");
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id);
     });
     socket.on("updateSpaceCount", (data) => {
-      console.log("Received updated space count:", data); // Log received data
+      console.log("Received updated space count:", data);
       if (data.userId === Cookies.get("userId")) {
-        console.log("Setting space count:", data.spaceCount); // Check the value before setting it
+        console.log("Setting space count:", data.spaceCount);
         setSpaceCount(data.spaceCount || 0);
       }
     });
@@ -117,13 +130,14 @@ const Home = () => {
       socket.off("updateSpaceCount");
       socket.disconnect();
     };
-  }, []);
+  }, [isAuthenticated]);
 
   if (!isAuthenticated) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <div className="bg-white p-8 rounded-md shadow-md">
-          Please login before reaching here
+          Please login before reaching here {"->"}
+          <Link to="/login" className="text-blue-500 underline"> Click here</Link>
         </div>
       </div>
     );
@@ -138,7 +152,7 @@ const Home = () => {
           <h1 className="text-4xl font-semibold text-gray-800 leading-tight mb-10">Overview</h1>
           <div className="flex items-center justify-center gap-8">
             <OverviewCard icon={<IoVideocamOutline className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Videos" description="0 / 2" />
-            <OverviewCard icon={<AiFillDingtalkCircle className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Spaces" description={`${spaceCount}`} />
+            <OverviewCard icon={<AiFillDingtalkCircle className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Spaces" description={`${spaceCount}` || 1} />
             <OverviewCard icon={<GrPlan className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Current Plan" description={
               <div className="flex items-center justify-center mt-3 space-x-2">
                 <p className="text-lg text-gray-500">Starter</p>

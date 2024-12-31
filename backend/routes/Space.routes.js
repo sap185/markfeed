@@ -66,5 +66,21 @@ router.post("/save-space", upload.single('spaceImage'), async (req, res) => {
     }
 });
 
+router.get("/get-space-count", async (req, res) => {
+    const userId = req.query.userId;
+
+    if (!userId) {
+        return res.status(400).json({ error: "userId is required" });
+    }
+
+    try {
+        const spaceCount = await Space.countDocuments({ userId });
+        res.status(200).json({ spaceCount });
+    } catch (error) {
+        console.error("Error fetching space count:", error);
+        res.status(500).json({ error: "Failed to fetch space count" });
+    }
+});
+
 
 export default router;
