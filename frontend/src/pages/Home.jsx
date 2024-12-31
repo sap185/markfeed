@@ -39,6 +39,7 @@ const Home = () => {
   });
   const [errors, setErrors] = useState({});
   const [spaceCount, setSpaceCount] = useState(0);
+  const [blink, setBlink] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -117,6 +118,7 @@ const Home = () => {
     const socket = io("http://localhost:5001");
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id);
+      setBlink(true);
     });
     socket.on("updateSpaceCount", (data) => {
       console.log("Received updated space count:", data);
@@ -129,6 +131,7 @@ const Home = () => {
     return () => {
       socket.off("updateSpaceCount");
       socket.disconnect();
+      setBlink(false);
     };
   }, [isAuthenticated]);
 
@@ -150,9 +153,14 @@ const Home = () => {
       <div className="flex items-center justify-center py-10">
         <div className="w-full max-w-[1000px] p-10">
           <h1 className="text-4xl font-semibold text-gray-800 leading-tight mb-10">Overview</h1>
+          {/* <div className={`w-4 h-4 rounded-full ${blink ? "bg-green-500 animate-ping" : "bg-gray-400"}`} >
+            <span className="text-sm text-gray-700">
+              {blink ? "Connected" : "Disconnected"}
+            </span>
+          </div> */}
           <div className="flex items-center justify-center gap-8">
             <OverviewCard icon={<IoVideocamOutline className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Videos" description="0 / 2" />
-            <OverviewCard icon={<AiFillDingtalkCircle className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Spaces" description={`${spaceCount}` || 1} />
+            <Link to="/spaces"><OverviewCard icon={<AiFillDingtalkCircle className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Spaces" description={`${spaceCount}` || 1} /></Link>
             <OverviewCard icon={<GrPlan className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Current Plan" description={
               <div className="flex items-center justify-center mt-3 space-x-2">
                 <p className="text-lg text-gray-500">Starter</p>
@@ -185,90 +193,92 @@ const Home = () => {
         </div>
       </div>
 
-      {showModal && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-          <div
-            className="bg-white rounded-md shadow-lg w-[1000px] h-[600px] p-8 relative flex overflow-auto"
-            style={{ maxHeight: "90vh" }}
-          >
-            <div className="w-1/2 pr-4">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Create New Space</h2>
-              <form className="space-y-4" onSubmit={handleSubmit}>
-                <div> {/* for space name */}
-                  <label className="block text-gray-700 mb-2">
-                    Space Name <span className="text-red-500">*</span>
-                  </label>
-                  <input type="text" name="headerName" value={formData.headerName} onChange={handleInputChange} className={`w-full border rounded-md p-2 ${errors.name ? "border-red-500" : "border-gray-300"}`} placeholder="Enter space name" />
-                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 mb-2">Space Image</label>
-                  <div className="relative inline-block">
-                    <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-300">
-                      <img src={spaceImage} alt="Space" className="w-full h-full object-cover" />
-                    </div>
-                    <input type="file" accept="image/*" id="spaceImageInput" onChange={handleImageChange} className="hidden" />
-                    <label
-                      htmlFor="spaceImageInput"
-                      className="absolute top-1/2 transform -translate-y-1/2 -right-4 bg-blue-500 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white cursor-pointer" >
-                      <span className="text-white text-sm font-bold">+</span>
+      {
+        showModal && (
+          <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+            <div
+              className="bg-white rounded-md shadow-lg w-[1000px] h-[600px] p-8 relative flex overflow-auto"
+              style={{ maxHeight: "90vh" }}
+            >
+              <div className="w-1/2 pr-4">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Create New Space</h2>
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                  <div> {/* for space name */}
+                    <label className="block text-gray-700 mb-2">
+                      Space Name <span className="text-red-500">*</span>
                     </label>
+                    <input type="text" name="headerName" value={formData.headerName} onChange={handleInputChange} className={`w-full border rounded-md p-2 ${errors.name ? "border-red-500" : "border-gray-300"}`} placeholder="Enter space name" />
+                    {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-gray-700 mb-2">Description</label>
-                  <input type="text" name="description" value={formData.description} onChange={handleInputChange} className="w-full border rounded-md p-2 border-gray-300" placeholder="Enter category" />
-                </div>
-                <div>
-                  <label className="block text-gray-700 mb-2">Customized Message</label>
-                  <input type="text" name="customizedMessage" value={formData.customizedMessage} onChange={handleInputChange} className="w-full border rounded-md p-2 border-gray-300" placeholder="Enter tags (comma-separated)" />
-                </div>
-                <div>
-                  <label className="block text-gray-700 mb-2">Question : 1</label>
-                  <input type="text" name="question1" value={formData.question1} onChange={handleInputChange} className="w-full border rounded-md p-2 border-gray-300" />
-                </div>
-                <div>
-                  <label className="block text-gray-700 mb-2">Question : 2</label>
-                  <input type="text" name="question2" checked={formData.question2} onChange={handleInputChange} className="w-full border rounded-md p-2 border-gray-300" />
-                </div>
-
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white rounded-md px-4 py-2 hover:bg-blue-700"
-                >
-                  Save
-                </button>
-              </form>
-            </div>
-            <div className="w-1/2 pl-4 border-l border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Preview</h2>
-              <div className="border rounded-md p-4">
-                <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 overflow-hidden border-4 border-gray-300 mb-4">
-                    <img src={spaceImage} alt="Preview Space" className="w-full h-full object-cover" />
+                  <div>
+                    <label className="block text-gray-700 mb-2">Space Image</label>
+                    <div className="relative inline-block">
+                      <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-300">
+                        <img src={spaceImage} alt="Space" className="w-full h-full object-cover" />
+                      </div>
+                      <input type="file" accept="image/*" id="spaceImageInput" onChange={handleImageChange} className="hidden" />
+                      <label
+                        htmlFor="spaceImageInput"
+                        className="absolute top-1/2 transform -translate-y-1/2 -right-4 bg-blue-500 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white cursor-pointer" >
+                        <span className="text-white text-sm font-bold">+</span>
+                      </label>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-700">{formData.headerName || "Space Name"}</h3>
-                  <p className="text-gray-500 mt-2">{formData.description || "Description will appear here."}</p>
-                  <p className="text-gray-500 mt-2">{formData.customizedMessage || "Customized Message will appear here."}</p>
-                  <p className="text-gray-500 mt-2">{formData.question1 || "Category will appear here."}</p>
-                  <p className="text-gray-500 mt-2">{formData.question2 || "Tags will appear here."}</p>
+
+                  <div>
+                    <label className="block text-gray-700 mb-2">Description</label>
+                    <input type="text" name="description" value={formData.description} onChange={handleInputChange} className="w-full border rounded-md p-2 border-gray-300" placeholder="Enter category" />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2">Customized Message</label>
+                    <input type="text" name="customizedMessage" value={formData.customizedMessage} onChange={handleInputChange} className="w-full border rounded-md p-2 border-gray-300" placeholder="Enter tags (comma-separated)" />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2">Question : 1</label>
+                    <input type="text" name="question1" value={formData.question1} onChange={handleInputChange} className="w-full border rounded-md p-2 border-gray-300" />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2">Question : 2</label>
+                    <input type="text" name="question2" checked={formData.question2} onChange={handleInputChange} className="w-full border rounded-md p-2 border-gray-300" />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="bg-blue-600 text-white rounded-md px-4 py-2 hover:bg-blue-700"
+                  >
+                    Save
+                  </button>
+                </form>
+              </div>
+              <div className="w-1/2 pl-4 border-l border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Preview</h2>
+                <div className="border rounded-md p-4">
+                  <div className="flex flex-col items-center">
+                    <div className="w-20 h-20 overflow-hidden border-4 border-gray-300 mb-4">
+                      <img src={spaceImage} alt="Preview Space" className="w-full h-full object-cover" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-700">{formData.headerName || "Space Name"}</h3>
+                    <p className="text-gray-500 mt-2">{formData.description || "Description will appear here."}</p>
+                    <p className="text-gray-500 mt-2">{formData.customizedMessage || "Customized Message will appear here."}</p>
+                    <p className="text-gray-500 mt-2">{formData.question1 || "Category will appear here."}</p>
+                    <p className="text-gray-500 mt-2">{formData.question2 || "Tags will appear here."}</p>
+                  </div>
                 </div>
               </div>
+              <button
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                onClick={toggleModal}
+              >
+                ✖
+              </button>
             </div>
-            <button
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-              onClick={toggleModal}
-            >
-              ✖
-            </button>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <Footer />
-    </div>
+    </div >
   );
 };
 

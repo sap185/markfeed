@@ -45,11 +45,11 @@ router.post("/save-space", upload.single('spaceImage'), async (req, res) => {
                         .status(200)
                         .json({ message: 'Space saved successfully', space: savedSpace });
 
-                        const io = getIo();
-                        const spaceCount = await Space.countDocuments({ userId: req.body.userId });
-                        console.log("spaceCount:", spaceCount);
-                        io.emit("updateSpaceCount", { userId: req.body.userId, spaceCount });
-                        console.log(io.emit("updateSpaceCount", { userId: req.body.userId, spaceCount }));
+                    const io = getIo();
+                    const spaceCount = await Space.countDocuments({ userId: req.body.userId });
+                    // console.log("spaceCount:", spaceCount);
+                    io.emit("updateSpaceCount", { userId: req.body.userId, spaceCount });
+                    // console.log(io.emit("updateSpaceCount", { userId: req.body.userId, spaceCount }));
 
                 } catch (dbError) {
                     res
@@ -66,13 +66,12 @@ router.post("/save-space", upload.single('spaceImage'), async (req, res) => {
     }
 });
 
+// Geting the Space Count
 router.get("/get-space-count", async (req, res) => {
     const userId = req.query.userId;
-
     if (!userId) {
         return res.status(400).json({ error: "userId is required" });
     }
-
     try {
         const spaceCount = await Space.countDocuments({ userId });
         res.status(200).json({ spaceCount });
@@ -82,5 +81,17 @@ router.get("/get-space-count", async (req, res) => {
     }
 });
 
+// Getting the space Image
+router.get("/get-space-details", async (req, res) => {
+    const userId = req.query.userId;
+    if (userId) {
+        try {
+            const space = await Space.findOne({ userId });
+            res.status(200).json({ space });
+        } catch (error) {
+            console.log(error);
+        }
+    }
+})
 
 export default router;

@@ -5,6 +5,7 @@ import Signup from './pages/Signup';
 import Home from './pages/Home';
 import Settings from './pages/Settings';
 import CheckPage from './pages/CheckPage';
+import SpacePage  from './pages/SpacePage';
 const App = () => {
   return (
     <Router>
@@ -13,6 +14,7 @@ const App = () => {
         <Route path="/Login" element={<Login />} />
         <Route path="/Signup" element={<Signup />} />
         <Route path="/Home" element={<Home />} />
+        <Route path='/spaces' element={<SpacePage />} />
         <Route path="/Settings" element={<Settings />} />
         <Route path='/check' element={<CheckPage />}></Route>
       </Routes>
