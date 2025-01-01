@@ -6,6 +6,8 @@ import Home from './pages/Home';
 import Settings from './pages/Settings';
 import CheckPage from './pages/CheckPage';
 import SpacePage  from './pages/SpacePage';
+import FeedbackPage from './pages/FeedbackPage';
+import {CheckVideoAudio} from './pages/CheckVideoaudio';
 const App = () => {
   return (
     <Router>
@@ -15,8 +17,10 @@ const App = () => {
         <Route path="/Signup" element={<Signup />} />
         <Route path="/Home" element={<Home />} />
         <Route path='/spaces' element={<SpacePage />} />
+        <Route path="/feedback/:spaceId" element={<FeedbackPage />} />
         <Route path="/Settings" element={<Settings />} />
         <Route path='/check' element={<CheckPage />}></Route>
+        <Route path='/video' element={<CheckVideoAudio />}></Route>
       </Routes>
     </Router>
   );

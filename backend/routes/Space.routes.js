@@ -1,7 +1,7 @@
 import express from 'express';
 import cloudinary from 'cloudinary';
 import multer from 'multer';
-import Space from '../models/Spaces.models.js'; 
+import Space from '../models/Spaces.models.js';
 import FeedBackLink from '../models/FeedBackLink.models.js';
 import dotenv from "dotenv";
 import { getIo } from '../socket.js';
@@ -122,6 +122,24 @@ router.get("/get-feedback-link", async (req, res) => {
         res.status(500).json({ error: "An error occurred while fetching the feedback link" });
     }
 });
+
+router.get("/get-space-details-for-feedback/:spaceId", async (req, res) => {
+    const { spaceId } = req.params; // Extract spaceId from path parameters
+    if (!spaceId) {
+        return res.status(400).json({ error: "spaceId is required" });
+    }
+    try {
+        const space = await Space.findOne({ _id: spaceId });
+        if (!space) {
+            return res.status(404).json({ error: "Space not found" });
+        }
+        res.status(200).json({ space });
+    } catch (error) {
+        console.error("Error fetching space details:", error);
+        res.status(500).json({ error: "An error occurred while fetching space details" });
+    }
+});
+
 
 
 export default router;

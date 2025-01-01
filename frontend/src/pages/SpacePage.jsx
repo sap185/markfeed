@@ -4,14 +4,12 @@ import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { CiEdit } from "react-icons/ci";
 import sampleImage from "/1473.gif";
-// import { Link } from "react-router-dom";
 
 
 const SpacePage = () => {
     const [spaceImage, setSpaceImage] = useState("");
     const [spaceHeading, setSpaceHeading] = useState("");
     const [spaceCreationTime, setSpaceCreationTime] = useState("");
-    // const [author, setAuthor] = useState("");
     const [feedbackLink, setFeedbackLink] = useState("");
 
 
@@ -26,16 +24,12 @@ const SpacePage = () => {
                     const fixedSpaceImage = space.spaceImage.split("https://res.cloudinary.com")[1];
                     setSpaceImage(`https://res.cloudinary.com${fixedSpaceImage}`);
                 }
-
-                // console.log(space._id);
                 space.headerName && setSpaceHeading(space.headerName);
                 space.createdAt && setSpaceCreationTime(space.createdAt.split("T")[0]);
 
-                // Fetch feedback link
                 try {
                     const feedbackResponse = await axiosInstance.get(`/api/get-feedback-link?spaceId=${space._id}`);
                     setFeedbackLink(feedbackResponse.data.feedbackLink);
-                    // console.log(feedbackResponse.data);
                 } catch (error) {
                     console.error("Error fetching feedback link:", error.response?.data || error.message);
                 }
