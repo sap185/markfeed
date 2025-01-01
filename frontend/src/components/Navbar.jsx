@@ -45,7 +45,7 @@ export default function Navbar() {
             <span className="sr-only">Testimonial</span>
             <Link to="/"><img
               alt="Testimonial"
-              src="../../public/istockphoto-1183790559-612x612.jpg"
+              src="/istockphoto-1183790559-612x612.jpg"
               className="h-8 w-auto rounded-lg"
             /></Link>
           </a>

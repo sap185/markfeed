@@ -1,35 +1,35 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose from 'mongoose';
 
 const SpaceSchema = new mongoose.Schema({
     userId: {
-        type: Schema.Types.ObjectId,
-        ref: 'user'
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
     },
     headerName: {
         type: String,
-        required: true
+        required: true,
     },
     customizedMessage: {
-        type: String
+        type: String,
     },
     description: {
-        type: String
+        type: String,
     },
     question1: {
-        type: String
+        type: String,
     },
     question2: {
-        type: String
+        type: String,
     },
     spaceImage: {
-        type: String
+        type: String,
     },
     createdAt: {
         type: Date,
         required: true,
-        default: Date.now
+        default: Date.now,
     },
 });
 
-const Space = mongoose.model("Space", SpaceSchema);
+const Space = mongoose.model('Space', SpaceSchema);
 export default Space;

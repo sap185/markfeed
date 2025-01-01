@@ -1,7 +1,8 @@
 import express from 'express';
 import cloudinary from 'cloudinary';
 import multer from 'multer';
-import Space from '../models/Spaces.models.js';
+import Space from '../models/Spaces.models.js'; 
+import FeedBackLink from '../models/FeedBackLink.models.js';
 import dotenv from "dotenv";
 import { getIo } from '../socket.js';
 
@@ -41,9 +42,15 @@ router.post("/save-space", upload.single('spaceImage'), async (req, res) => {
                 try {
                     // console.log("New space data before saving:", newSpace);
                     const savedSpace = await Space.create(newSpace);
+                    const feedbackLink = `${process.env.Frontend_URL}/feedback/${savedSpace._id}`;
+
+                    await FeedBackLink.create({
+                        spaceId: savedSpace._id,
+                        feedbackLink,
+                    });
                     res
                         .status(200)
-                        .json({ message: 'Space saved successfully', space: savedSpace });
+                        .json({ message: 'Space saved successfully', space: savedSpace, feedbackLink });
 
                     const io = getIo();
                     const spaceCount = await Space.countDocuments({ userId: req.body.userId });
@@ -93,5 +100,28 @@ router.get("/get-space-details", async (req, res) => {
         }
     }
 })
+
+router.get("/get-feedback-link", async (req, res) => {
+    const spaceId = req.query.spaceId;
+
+    if (!spaceId) {
+        return res.status(400).json({ error: "spaceId is required" });
+    }
+
+    try {
+        // Check for the feedback link in the FeedBackLink model
+        const feedbackLinkData = await FeedBackLink.findOne({ spaceId }).populate("spaceId");
+
+        if (!feedbackLinkData) {
+            return res.status(404).json({ error: `No feedback link found for spaceId ${spaceId}` });
+        }
+
+        res.status(200).json({ feedbackLink: feedbackLinkData.feedbackLink });
+    } catch (error) {
+        console.error("Error fetching feedback link:", error);
+        res.status(500).json({ error: "An error occurred while fetching the feedback link" });
+    }
+});
+
 
 export default router;

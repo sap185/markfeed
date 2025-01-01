@@ -39,7 +39,7 @@ const Home = () => {
   });
   const [errors, setErrors] = useState({});
   const [spaceCount, setSpaceCount] = useState(0);
-  const [blink, setBlink] = useState(false);
+  // const [blink, setBlink] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -118,7 +118,7 @@ const Home = () => {
     const socket = io("http://localhost:5001");
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id);
-      setBlink(true);
+      // setBlink(true);
     });
     socket.on("updateSpaceCount", (data) => {
       console.log("Received updated space count:", data);
@@ -131,7 +131,7 @@ const Home = () => {
     return () => {
       socket.off("updateSpaceCount");
       socket.disconnect();
-      setBlink(false);
+      // setBlink(false);
     };
   }, [isAuthenticated]);
 
@@ -160,7 +160,7 @@ const Home = () => {
           </div> */}
           <div className="flex items-center justify-center gap-8">
             <OverviewCard icon={<IoVideocamOutline className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Videos" description="0 / 2" />
-            <Link to="/spaces"><OverviewCard icon={<AiFillDingtalkCircle className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Spaces" description={`${spaceCount}` || 1} /></Link>
+            <Link to="/spaces" className={spaceCount === 0 ? "pointer-events-none" : ""}><OverviewCard icon={<AiFillDingtalkCircle className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Total Spaces" description={`${spaceCount}` || 1} /></Link>
             <OverviewCard icon={<GrPlan className="h-14 w-14 text-blue-600 mx-auto mb-4" />} title="Current Plan" description={
               <div className="flex items-center justify-center mt-3 space-x-2">
                 <p className="text-lg text-gray-500">Starter</p>

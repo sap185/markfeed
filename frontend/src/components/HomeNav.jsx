@@ -12,7 +12,7 @@ export default function HomeNav() {
           <Link to="/" className="-m-1.5 p-1.5">
             <img
               alt="Testimonial"
-              src="../../public/istockphoto-1183790559-612x612.jpg"
+              src="/istockphoto-1183790559-612x612.jpg"
               className="h-8 w-auto rounded-lg"
             />
           </Link>

@@ -2,48 +2,95 @@ import axiosInstance from "../api/axios";
 import HomeNav from "../components/HomeNav";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import { CiEdit } from "react-icons/ci";
+import sampleImage from "/1473.gif";
+// import { Link } from "react-router-dom";
 
 
 const SpacePage = () => {
     const [spaceImage, setSpaceImage] = useState("");
     const [spaceHeading, setSpaceHeading] = useState("");
     const [spaceCreationTime, setSpaceCreationTime] = useState("");
+    // const [author, setAuthor] = useState("");
+    const [feedbackLink, setFeedbackLink] = useState("");
+
+
 
     useEffect(() => {
         const fetchSpaceImage = async () => {
-            const response = await axiosInstance.get(`/api/get-space-details?userId=${Cookies.get("userId")}`);
-            // response.data.spaceImage && setSpaceImage(response.data.spaceImage);
-            if (response.data.space.spaceImage) {
-                const fixedSpaceImage = response.data.space.spaceImage.split("https://res.cloudinary.com")[1];
-                setSpaceImage(`https://res.cloudinary.com${fixedSpaceImage}`);
+            try {
+                const response = await axiosInstance.get(`/api/get-space-details?userId=${Cookies.get("userId")}`);
+                const space = response.data.space;
+
+                if (space.spaceImage) {
+                    const fixedSpaceImage = space.spaceImage.split("https://res.cloudinary.com")[1];
+                    setSpaceImage(`https://res.cloudinary.com${fixedSpaceImage}`);
+                }
+
+                // console.log(space._id);
+                space.headerName && setSpaceHeading(space.headerName);
+                space.createdAt && setSpaceCreationTime(space.createdAt.split("T")[0]);
+
+                // Fetch feedback link
+                try {
+                    const feedbackResponse = await axiosInstance.get(`/api/get-feedback-link?spaceId=${space._id}`);
+                    setFeedbackLink(feedbackResponse.data.feedbackLink);
+                    // console.log(feedbackResponse.data);
+                } catch (error) {
+                    console.error("Error fetching feedback link:", error.response?.data || error.message);
+                }
+            } catch (error) {
+                console.error("Error fetching space details:", error.response?.data || error.message);
             }
-            // console.log(response.data);
-            response.data.space.headerName && setSpaceHeading(response.data.space.headerName);
-            response.data.space.createdAt && setSpaceCreationTime(response.data.space.createdAt.split("T")[0]);
-        }
+        };
+
         fetchSpaceImage();
-    }, [])
+    }, []);
+
 
 
     return (
         <div className="flex flex-col bg-gray-50 min-h-screen">
             <HomeNav />
             <div className="flex flex-col items-center py-10 px-6">
+                <div className="flex flex-col items-center py-10 px-6">
+                    <p className="text-lg text-red-600 font-semibold">Here is Your Feedback Giving Link For Your Space:</p>
+                    {feedbackLink ? (
+                        <a
+                            href={feedbackLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 font-medium underline mt-4"
+                        >
+                            {feedbackLink}
+                        </a>
+                    ) : (
+                        <p className="text-gray-500 mt-4">No feedback link available yet.</p>
+                    )}
+                </div>
                 <div className="flex flex-col md:flex-row items-center gap-6 bg-white shadow-md rounded-lg p-6 w-full max-w-4xl">
                     <img
-                        src={spaceImage}
-                        alt="Space Avatar"
-                        className="float-left w-32 h-32 rounded-lg border-4 border-gray-300 shadow-md"
+                        src={spaceImage || sampleImage}
+                        alt={spaceHeading ? `${spaceHeading} Avatar` : "Default Space Avatar"}
+                        className="float-left w-32 h-32 rounded-lg border-4 border-gray-300 shadow-md object-cover"
                     />
                     <div className="text-left">
-                        <h2 className="text-3xl font-bold text-gray-800">
-                            {spaceHeading || "Space Name"}
+                        <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                            {spaceHeading || "Untitled Space"}
+                            <button
+                                className="text-gray-500 hover:text-gray-700"
+                                aria-label="Edit space name"
+                            >
+                                <CiEdit />
+                            </button>
                         </h2>
                         <p className="text-sm text-gray-500 mt-2">
-                            Created on: <span className="font-medium">{spaceCreationTime || "DD-MM-YYYY"}</span>
+                            Created on:{" "}
+                            <span className="font-medium">{spaceCreationTime || "Not Specified"}</span>
                         </p>
                     </div>
                 </div>
+
 
                 <hr className="border-2 border-gray-300 my-8 w-full max-w-4xl" />
                 <div className="text-center px-4 max-w-4xl">
