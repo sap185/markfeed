@@ -7,7 +7,7 @@ import Settings from './pages/Settings';
 import CheckPage from './pages/CheckPage';
 import SpacePage  from './pages/SpacePage';
 import FeedbackPage from './pages/FeedbackPage';
-import {CheckVideoAudio} from './pages/CheckVideoaudio';
+import CheckVideoAudio from './pages/CheckVideoaudio';
 const App = () => {
   return (
     <Router>
