@@ -1,52 +1,80 @@
-import { useCallback, useRef, useState } from "react";
-import Webcam from "react-webcam";
-import RecordRTC from "recordrtc";
+import { useState, useEffect } from "react";
+import { ReactMediaRecorder } from "react-media-recorder";
 
 const CheckVideoaudio = () => {
-  const webcamRef = useRef(null);
-  const recorderRef = useRef(null);
-  const [recording, setRecording] = useState(false);
-  const [recordedVideo, setRecordedVideo] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaBlobUrl, setMediaBlobUrl] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
+    console.log("Closing modal...");
     setIsModalOpen(false);
-    setRecordedVideo(null); // Reset recorded video on close
+    setMediaBlobUrl(null);
+    window.location.reload(); // Reload the page
   };
 
-  const handleStartCaptureClick = useCallback(() => {
-    if (webcamRef.current && webcamRef.current.video) {
-      const stream = webcamRef.current.video.srcObject;
-      setRecording(true);
-      recorderRef.current = new RecordRTC(stream, {
-        type: "video",
-        mimeType: "video/webm",
-      });
-      recorderRef.current.startRecording();
-    }
-  }, []);
+  const handleReRecord = (startRecording) => {
+    closeModal();
+    setTimeout(() => {
+      startRecording();
+      setIsRecording(true);
+      window.location.reload(); // Reload the page after re-recording
+    }, 100); // Ensure state updates before starting recording
+  };
 
-  const handleStopCaptureClick = useCallback(() => {
-    if (recorderRef.current) {
-      setRecording(false);
-      recorderRef.current.stopRecording(() => {
-        const blob = recorderRef.current.getBlob();
-        const videoUrl = URL.createObjectURL(blob);
-        setRecordedVideo(videoUrl);
-        webcamRef.current.video.srcObject.getTracks().forEach((track) => track.stop()); // Stop webcam feed
-      });
+  useEffect(() => {
+    if (mediaBlobUrl) {
+      openModal();
     }
-  }, []);
+  }, [mediaBlobUrl]);
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <button
-        onClick={openModal}
-        className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600 transition duration-200"
-      >
-        Record Video
-      </button>
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+      <h1 className="text-xl font-semibold mb-4">Video & Audio Recorder</h1>
+      <ReactMediaRecorder
+        video
+        audio
+        render={({ status, startRecording, stopRecording, mediaBlobUrl, previewStream }) => (
+          <div className="w-full max-w-md p-4 bg-white shadow-md rounded-md">
+            <p className="text-center text-gray-600 mb-4">{`Status: ${status}`}</p>
+            <div className="flex flex-col items-center mb-4">
+              {previewStream && (
+                <video
+                  autoPlay
+                  muted
+                  ref={(video) => {
+                    if (video) video.srcObject = previewStream;
+                  }}
+                  className="w-full h-auto rounded-md mb-4"
+                />
+              )}
+              {isRecording ? (
+                <button
+                  onClick={() => {
+                    stopRecording();
+                    setIsRecording(false);
+                  }}
+                  className="px-4 py-2 bg-red-500 text-white rounded-md shadow-md hover:bg-red-600"
+                >
+                  Stop Recording
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    startRecording();
+                    setIsRecording(true);
+                  }}
+                  className="px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600"
+                >
+                  Start Recording
+                </button>
+              )}
+            </div>
+            {status === "stopped" && setMediaBlobUrl(mediaBlobUrl)}
+          </div>
+        )}
+      />
 
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -57,44 +85,21 @@ const CheckVideoaudio = () => {
             >
               ✖
             </button>
-
-            {!recordedVideo ? (
-              <div>
-                <Webcam
-                  className="w-full h-auto rounded-md"
-                  audio={true}
-                  mirrored={true}
-                  ref={webcamRef}
-                />
-                <div className="flex justify-center space-x-4 mt-4">
-                  {recording ? (
-                    <button
-                      onClick={handleStopCaptureClick}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition duration-200"
-                    >
-                      Stop Recording
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleStartCaptureClick}
-                      className="px-4 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-200"
-                    >
-                      Start Recording
-                    </button>
-                  )}
-                </div>
-              </div>
+            <h2 className="text-center text-lg font-semibold mb-4">Recorded Video</h2>
+            {mediaBlobUrl ? (
+              <video className="w-full h-auto rounded-md" src={mediaBlobUrl} controls />
             ) : (
-              <div>
-                <video
-                  className="w-full h-auto rounded-md"
-                  controls
-                  src={recordedVideo}
-                  autoPlay
-                />
-                <p className="text-center text-gray-600 mt-2">Recorded Video</p>
-              </div>
+              <p className="text-center text-gray-600">No video available.</p>
             )}
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={() => handleReRecord(() => setIsRecording(true))}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600"
+              >
+                Re-record
+              </button>
+              <button className="px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600">Submit</button>
+            </div>
           </div>
         </div>
       )}
