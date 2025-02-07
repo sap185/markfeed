@@ -15,22 +15,21 @@ const CheckVideoaudio = () => {
   };
 
   const handleReRecord = (startRecording) => {
-    closeModal();
+    closeModal(); // Close the modal and reload the page
     setTimeout(() => {
-      startRecording();
+      startRecording(); // Start recording after reload
       setIsRecording(true);
-      window.location.reload(); // Reload the page after re-recording
-    }, 100); // Ensure state updates before starting recording
+    }, 100); // Small delay to ensure state updates
   };
 
   useEffect(() => {
     if (mediaBlobUrl) {
-      openModal();
+      openModal(); // Open modal when a recording is available
     }
   }, [mediaBlobUrl]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-500">
       <h1 className="text-xl font-semibold mb-4">Video & Audio Recorder</h1>
       <ReactMediaRecorder
         video
@@ -44,7 +43,7 @@ const CheckVideoaudio = () => {
                   autoPlay
                   muted
                   ref={(video) => {
-                    if (video) video.srcObject = previewStream;
+                    if (video) video.srcObject = previewStream; // Show live preview
                   }}
                   className="w-full h-auto rounded-md mb-4"
                 />
@@ -77,8 +76,8 @@ const CheckVideoaudio = () => {
       />
 
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-2/3 lg:w-1/2 p-6 relative">
+        <div className="relative inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-black rounded-lg shadow-lg w-1/2 h-1/2 p-4 relative">
             <button
               onClick={closeModal}
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
@@ -87,22 +86,23 @@ const CheckVideoaudio = () => {
             </button>
             <h2 className="text-center text-lg font-semibold mb-4">Recorded Video</h2>
             {mediaBlobUrl ? (
-              <video className="w-full h-auto rounded-md" src={mediaBlobUrl} controls />
+              <video className="w-full h-auto rounded-md" src={mediaBlobUrl} controls style={{ maxHeight: "200px" }} />
             ) : (
               <p className="text-center text-gray-600">No video available.</p>
             )}
             <div className="flex justify-center gap-4 mt-4">
               <button
                 onClick={() => handleReRecord(() => setIsRecording(true))}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600"
+                className="px-3 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600"
               >
                 Re-record
               </button>
-              <button className="px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600">Submit</button>
+              <button className="px-3 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600">Submit</button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };

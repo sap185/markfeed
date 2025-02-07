@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../api/axios";
 import { IoVideocamOutline } from "react-icons/io5";
 import { BiMessageAltEdit } from "react-icons/bi";
-import { useReactMediaRecorder } from "react-media-recorder";
+import CheckVideoaudio from "./CheckVideoaudio";
 
 const FeedbackPage = () => {
     const { spaceId } = useParams();
@@ -11,14 +11,8 @@ const FeedbackPage = () => {
     const [error, setError] = useState("");
     const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-    // React Media Recorder Hooks
-    const {
-        startRecording,
-        stopRecording,
-        previewStream,
-        mediaBlobUrl,
-        clearBlobUrl,
-    } = useReactMediaRecorder({ video: true, audio: true });
+    const openPopup = () => setIsPopupOpen(true);
+    const closePopup = () => setIsPopupOpen(false);
 
     useEffect(() => {
         if (spaceId) {
@@ -56,7 +50,7 @@ const FeedbackPage = () => {
 
                     <div className="flex flex-wrap gap-4 text-gray-200 p-2 justify-center">
                         <button
-                            onClick={() => setIsPopupOpen(true)}
+                            onClick={openPopup}
                             className="flex items-center gap-2 bg-blue-500 hover:bg-purple-500 text-white py-2 px-4 rounded"
                         >
                             <IoVideocamOutline />
@@ -68,75 +62,23 @@ const FeedbackPage = () => {
                         </button>
                     </div>
 
-                    {/* Popup for Video Recording */}
                     {isPopupOpen && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-lg p-6 w-11/12 md:w-2/3 lg:w-1/2 shadow-lg">
-                                <h3 className="text-2xl font-bold text-gray-700 mb-4">Record Your Feedback</h3>
-
-                                {/* Video Preview during Recording */}
-                                {previewStream && (
-                                    <video
-                                        srcObject={previewStream}
-                                        autoPlay
-                                        controls={false}
-                                        className="border-4 border-gray-300 rounded-lg shadow-md w-full"
-                                    ></video>
-                                )}
-
-                                {/* Video Preview after Recording */}
-                                {mediaBlobUrl && (
-                                    <video
-                                        src={mediaBlobUrl}
-                                        controls
-                                        className="border-4 border-gray-300 rounded-lg shadow-md w-full mt-4"
-                                    ></video>
-                                )}
-
-                                <div className="flex justify-end gap-4 mt-4">
-                                    {!mediaBlobUrl && (
-                                        <button
-                                            onClick={startRecording}
-                                            className="bg-green-500 hover:bg-green-800 text-white py-2 px-4 rounded"
-                                        >
-                                            Start Recording
-                                        </button>
-                                    )}
-                                    {!mediaBlobUrl && (
-                                        <button
-                                            onClick={stopRecording}
-                                            className="bg-red-500 hover:bg-red-800 text-white py-2 px-4 rounded"
-                                        >
-                                            Stop Recording
-                                        </button>
-                                    )}
-                                    {mediaBlobUrl && (
-                                        <button
-                                            onClick={() => {
-                                                const a = document.createElement("a");
-                                                a.href = mediaBlobUrl;
-                                                a.download = "feedback-recording.webm";
-                                                a.click();
-                                                clearBlobUrl();
-                                            }}
-                                            className="bg-blue-500 hover:bg-blue-800 text-white py-2 px-4 rounded"
-                                        >
-                                            Download Recording
-                                        </button>
-                                    )}
-                                    <button
-                                        onClick={() => setIsPopupOpen(false)}
-                                        className="bg-gray-500 hover:bg-gray-800 text-white py-2 px-4 rounded"
-                                    >
-                                        Close
-                                    </button>
-                                </div>
+                        <div className="relative inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                            <div className="w-1/2 h-1/2 bg-white p-4 rounded-lg shadow-lg">
+                                <button
+                                    onClick={closePopup}
+                                    className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+                                >
+                                    ✖
+                                </button>
+                                <h2 className="text-center text-lg font-semibold mb-4">Video Recorder</h2>
+                                <CheckVideoaudio onClose={closePopup} />
                             </div>
                         </div>
                     )}
                 </div>
             ) : (
-                <p className="text-gray-600">Loading space details...</p>
+                <p>Loading space details...</p>
             )}
         </div>
     );
